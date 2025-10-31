@@ -2,26 +2,34 @@ package com.atguigu.chapter07;
 
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
 public class KafkaConfig {
 
     private static Producer<String, String> producer;
 
     public static void init() {
-
-
     }
 
     public static FlinkKafkaConsumer getConsumer(String topic) {
         Properties props = new Properties();
         props.put("bootstrap.servers", "uat-kafka-002-sg01-svr1.ttbike.com.cn:9092,uat-kafka-002-sg01-svr2.ttbike.com.cn:9092,uat-kafka-002-sg01-svr3.ttbike.com.cn:9092");
-        props.put("group.id", "flink-label-engine-new");
+        props.put("group.id", "flink-label-engine-ht");
+        props.put("flink.partition-discovery.interval-millis", 10000);
+
+        FlinkKafkaConsumer<String> flinkKafkaConsumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), props);
+
+        return flinkKafkaConsumer;
+    }
+
+    public static FlinkKafkaConsumer getConsumerFatCn(String topic) {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092");
+        props.put("group.id", "flink-label-engine-ht");
         props.put("flink.partition-discovery.interval-millis", 10000);
 
         FlinkKafkaConsumer<String> flinkKafkaConsumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), props);

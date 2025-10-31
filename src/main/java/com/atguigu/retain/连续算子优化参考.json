@@ -1,0 +1,169 @@
+[
+  [
+    {
+      "sourceTopic": "yukon-ebik-appevbikeservice",
+      "unitName": "SourceInfo",
+      "sourceType": "kafka",
+      "uidName": "1",
+      "parallelism": 2,
+      "isYukon": true,
+      "sourceBootstrapServers": "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092",
+      "sourceMetric": "ebik.sharp.helmet.status",
+      "key": "bike_no"
+    },
+    {
+      "sourceTopic": "metrics-evbike-state",
+      "unitName": "SourceInfo",
+      "sourceType": "kafka",
+      "uidName": "21",
+      "parallelism": 2,
+      "isYukon": true,
+      "sourceBootstrapServers": "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092",
+      "sourceMetric": "Bike.Ev.State",
+      "key": "bikeNo"
+    },
+    {
+      "sourceTopic": "yukon-ebik-appeleccommonprotocolservice",
+      "unitName": "SourceInfo",
+      "sourceType": "kafka",
+      "uidName": "31",
+      "parallelism": 2,
+      "isYukon": true,
+      "sourceBootstrapServers": "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092",
+      "sourceMetric": "ebik.odyssey.helmet.lock.result",
+      "key": "bike_no"
+    },
+    {
+      "unitName": "InflowInfo",
+      "upStream": "21",
+      "uidName": "2_inflow",
+      "inflowField": {
+        "bike_no": "data(bikeNo)"
+      },
+      "saveField": [
+        "helmet_lock_status",
+        "bike_no"
+      ]
+    },
+    {
+      "condition": "apollo(4021_4022_gray) @ all || apollo(4021_4022_gray) @ redis(86400000 hget evbike:$bike_no cityGuid)",
+      "unitName": "ConditionInfo",
+      "upStream": "1,2_inflow,31",
+      "uidName": "2"
+    },
+    {
+      "unitName": "SplitInfo",
+      "upStream": "2",
+      "uidName": "3_split",
+      "outPutWithCondition": {
+        "add": "data(YUKON_INNER_METRIC) == ebik.sharp.helmet.status",
+        "remove": "Bike.Ev.State,ebik.odyssey.helmet.lock.result @ data(YUKON_INNER_METRIC)"
+      }
+    },
+    {
+      "condition": "isNull(redis(30000 hget order:$ride_guid helmet_error))",
+      "unitName": "ConditionInfo",
+      "upStream": "3_split:add",
+      "uidName": "3",
+      "inflowField": {
+        "op_type": "add"
+      }
+    },
+    {
+      "condition": "(3 == data(sceneid) && (apollo(4021_errorCode_close) @ data(error_code) || apollo(4022_errorCode_close) @ data(error_code))) || (4 == data(sceneid) && (apollo(4021_errorCode_open) @ data(error_code) || apollo(4022_errorCode_open) @ data(error_code)))",
+      "unitName": "ConditionInfo",
+      "upStream": "3",
+      "uidName": "14"
+    },
+    {
+      "writeStr": "hset order:$ride_guid helmet_error $error_code",
+      "unitName": "RedisWriteInfo",
+      "upStream": "14",
+      "uidName": "15"
+    },
+    {
+      "condition": "data(YUKON_INNER_METRIC) == Bike.Ev.State && 1 == data(helmet_lock_status) || data(YUKON_INNER_METRIC) == ebik.odyssey.helmet.lock.result && 1,2 @ data(source) && 1 == data(method) && 0 == data(error_code)",
+      "unitName": "ConditionInfo",
+      "upStream": "3_split:remove",
+      "uidName": "23",
+      "inflowField": {
+        "op_type": "remove"
+      }
+    },
+    {
+      "sourceTopic": "metrics-two-wheels-alert",
+      "unitName": "SourceInfo",
+      "sourceType": "kafka",
+      "uidName": "metrics_alert_1",
+      "parallelism": 1,
+      "isYukon": true,
+      "sourceBootstrapServers": "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092",
+      "key": "assetNo"
+    },
+    {
+      "condition": "!ødata(assetNo) && !ødata(opType) && !ødata(labelCode) && 4021 == data(labelCode) && 1 == data(opType)",
+      "unitName": "ConditionInfo",
+      "upStream": "metrics_alert_1",
+      "uidName": "metrics_alert_2",
+      "inflowField": {
+        "bike_no": "data(assetNo)"
+      }
+    },
+    {
+      "countCondition": "n <= 3",
+      "condition": "remove == data(op_type)",
+      "unitName": "CountContinuousInfo",
+      "keyBy": "bike_no",
+      "upStream": "23,5,metrics_alert_2",
+      "uidName": "remove_filter"
+    },
+    {
+      "unitName": "LabelInfo",
+      "upStream": "remove_filter",
+      "uidName": "25",
+      "assetNo": "bike_no",
+      "extendsfield": {
+        "originMetric": "data(YUKON_INNER_METRIC)",
+        "bike_no": "data(bike_no)"
+      },
+      "labelCode": "4021",
+      "option": "remove"
+    },
+    {
+      "countCondition": "n >= 3",
+      "condition": "add == data(op_type) && (3 == data(sceneid) && apollo(4021_errorCode_close) @ data(error_code) || 4 == data(sceneid) && apollo(4021_errorCode_open) @ data(error_code))",
+      "unitName": "CountContinuousInfo",
+      "keyBy": "bike_no",
+      "upStream": "3,23",
+      "uidName": "4_1",
+      "inflowField": {
+        "labelCode": "4021"
+      },
+      "putMode": "cc"
+    },
+    {
+      "unitName": "LabelInfo",
+      "upStream": "4_1",
+      "uidName": "5",
+      "assetNo": "bike_no",
+      "extendsfield": {
+        "sceneId": "data(sceneid)",
+        "errorCode": "data(error_code)",
+        "orderCode": "data(ride_guid)",
+        "bike_no": "data(bike_no)",
+        "labelCode": "data(labelCode)"
+      },
+      "option": "add"
+    },
+    {
+      "unitName": "SinkInfo",
+      "metric": "asset.label",
+      "upStream": "25,5",
+      "uidName": "6",
+      "sinkBootstrapServers": "fat-kafka1.ttbike.com.cn:9092,fat-kafka2.ttbike.com.cn:9092,fat-kafka3.ttbike.com.cn:9092",
+      "sinkType": "kafka",
+      "sinkTopic": "metrics-vehicle-label-engine",
+      "key": "assetNo"
+    }
+  ]
+]

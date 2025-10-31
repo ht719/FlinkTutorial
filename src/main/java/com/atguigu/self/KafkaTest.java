@@ -1,23 +1,19 @@
-package com.atguigu.chapter07;
+package com.atguigu.self;
 
 import com.alibaba.fastjson.JSON;
-import com.google.gson.JsonObject;
+import com.atguigu.chapter07.HeartEntity;
+import com.atguigu.chapter07.KafkaConfig;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.StateBackendOptions;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.sling.commons.json.JSONObject;
 
 /**
  * @author hb30496
@@ -25,6 +21,9 @@ import org.apache.sling.commons.json.JSONObject;
  * @date 2024-09-28
  */
 
+/**
+ * 验证新增kafka消费者source，点位重置问题
+ */
 public class KafkaTest {
     // 写一段代码，从kafka中读取数据，并打印出来。
     public static void main(String[] args) throws Exception {

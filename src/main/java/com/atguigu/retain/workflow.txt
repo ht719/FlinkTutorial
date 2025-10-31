@@ -1,0 +1,89 @@
+启用workflow.mdc。
+这是prd: https://hellobike.yuque.com/pgi29t/eto1ec/fhym9xdtfcup2wl9，请分析该prd需求
+
+
+比如对外输出的数据详情页查询方法是：
+OutConfigResponse queryOutConfigDetail(QueryOutConfigRequest request)。
+那么导出的数据格式（比如字段名/字段类型）应该按照 OutConfigResponse 结构。
+
+
+-sql select&bpbpid,&bpbp1&bpbpas&bpbpasset_type,&bpbp2&bpbpas&bpbpasset_no,&bpbpcount(1)&bpbpbike&bpbpfrom&bpbpanalysis_sr_hive_ancestor&bpbpgroup&bpbpby&bpbpid
+
+
+1. 字段级血缘不展示返回给前端的拓扑图topology，其作为拓扑图的成员属性fieldLevelList返回（可以参考DataLineageController#queryLineageTopo出参结构）。当在数据对象的字段级列表选中某个字段时，此时需要在每个数据对象的名称后拼接 " | 字段名"来表示对象之间对字段的依赖关系（你可以参考DataLineageFrontMgr#doBuildAndTrans中的字段级血缘实现逻辑）。
+2. 数据集的上游包括：主体维度/事件/数据集。
+3. 数据加工 血缘的处理可以参考 DataProcessLineageTreeBuilder。
+4. 血缘构建有两个类：DataLineageMgr（从数据库中查询原始血缘，构建拓扑图）和DataLineageFrontMgr（基于DataLineageMgr产生的拓扑图，进行聚合 / 去重 / 剪枝）。
+5. 影响血缘关系的存储和查询。
+
+标签平台需求汇总：
+头盔卡束带 新增标签：https://hellobike.yuque.com/bbteam/rmkokt/gig3v0vwgytlsz9d
+海外心跳/位置数据源新老切换：https://hellobike.yuque.com/bbteam/rmkokt/fg1fxbul6m5b5sbf
+小北&蓝莓融合标签需求：https://hellobike.yuque.com/bbteam/rmkokt/lqmf8px0syyu87gb
+时间戳（数据时间）过滤：https://hellobike.yuque.com/bbteam/rmkokt/ip4zophfr0vpf1to
+人工标签打消标限流治理：https://hellobike.yuque.com/bbteam/rmkokt/ekoyn2o79aqsw5xz
+[海外] “Illegal Parking（违泊车）”标签：https://hellobike.yuque.com/bbteam/rmkokt/khvd5f48qtc6smzb
+社区租车-站外车：https://hellobike.yuque.com/bbteam/rmkokt/myadl76kqvnis6tc
+社区租车使用BOS运维-标签需求（一期）：https://hellobike.yuque.com/bbteam/rmkokt/waphal0zhdddk4ks
+标签后台邮件通知大消息治理：https://hellobike.yuque.com/bbteam/rmkokt/kuouoq5zes09sukx
+国内标签平台-增加系统公告能力：https://hellobike.yuque.com/bbteam/rmkokt/lts73lr7f3ppetgf
+asset_label_config 慢查治理：https://hellobike.yuque.com/bbteam/rmkokt/cibnp34o0qrta3k8
+GC治理优化- Mysql join：https://hellobike.yuque.com/bbteam/rmkokt/wp71wid16fup3zl6
+标签平台打消标去重过滤逻辑优化：https://hellobike.yuque.com/bbteam/rmkokt/npghxy36ylq1v9be
+新增「短时未骑行」标签：https://hellobike.yuque.com/bbteam/rmkokt/zpedc6bp0ic0whed
+海外「疑似未关锁（1123）」打标逻辑调整：https://hellobike.yuque.com/bbteam/rmkokt/hnphyaie9smg1b5d
+小品牌-长期闲置标签消费rocketmq迁移至kafka：https://hellobike.yuque.com/bbteam/rmkokt/si2pnhqdwvv0cnaa
+「故障电池车」打消标逻辑调整：https://hellobike.yuque.com/bbteam/rmkokt/phkq71791t7q79rr
+BOS&寻维&标签平台-标签集合增加展示排序：https://hellobike.yuque.com/bbteam/rmkokt/eb7dgtz1zo2p2zvq
+「头盔故障」、「头盔锁故障」标签打消标逻辑调整：https://hellobike.yuque.com/bbteam/rmkokt/rgsza5oye6pu9l6l
+人工标签禁用后自动消标：https://hellobike.yuque.com/bbteam/rmkokt/wp2gmwabx78y98uo
+新增单车车辆标签「枫叶」：https://hellobike.yuque.com/bbteam/rmkokt/kc54xq6hlabvmioa
+【低电需回仓】标签消标逻辑调整：https://hellobike.yuque.com/bbteam/rmkokt/vnz6w09cgx6wdfg2
+
+---
+头盔卡束带 新增标签：https://hellobike.yuque.com/pgi29t/eto1ec/hfs3eu96udpw7k4t
+海外心跳/位置数据源新老切换：https://hellobike.yuque.com/pgi29t/eto1ec/rwft28rxanuoelqt
+小北&蓝莓融合标签需求：https://hellobike.yuque.com/pgi29t/eto1ec/gq7imcqk6600pnpc
+时间戳（数据时间）过滤：https://hellobike.yuque.com/pgi29t/eto1ec/ysc3s31righy8zbd
+人工标签打消标限流治理：https://hellobike.yuque.com/pgi29t/eto1ec/zuxftfpp97581oiw
+[海外] “Illegal Parking（违泊车）”标签：https://hellobike.yuque.com/pgi29t/eto1ec/ev098x29x6wnkigx
+社区租车-站外车：https://hellobike.yuque.com/pgi29t/eto1ec/gvivyd4288c4d30r
+社区租车使用BOS运维-标签需求（一期）：https://hellobike.yuque.com/pgi29t/eto1ec/xg6ax2mu46v1rqqa
+标签后台邮件通知大消息治理：https://hellobike.yuque.com/pgi29t/eto1ec/sqzgh8utg1ss2kvt
+国内标签平台-增加系统公告能力：https://hellobike.yuque.com/pgi29t/eto1ec/lzni89rts842lqnk
+asset_label_config 慢查治理：https://hellobike.yuque.com/pgi29t/eto1ec/isoltepfta58bbn6
+GC治理优化- Mysql join：https://hellobike.yuque.com/pgi29t/eto1ec/lphyscvnmvd3ivxp
+标签平台打消标去重过滤逻辑优化：https://hellobike.yuque.com/pgi29t/eto1ec/rq0ygsg0k1pun683
+新增「短时未骑行」标签：https://hellobike.yuque.com/pgi29t/eto1ec/stuy0xyhc1y17ifr
+海外「疑似未关锁（1123）」打标逻辑调整：https://hellobike.yuque.com/pgi29t/eto1ec/fb67b0089owizavc
+小品牌-长期闲置标签消费rocketmq迁移至kafka：https://hellobike.yuque.com/pgi29t/eto1ec/dwfk23scfz8o3vxo
+「故障电池车」打消标逻辑调整：https://hellobike.yuque.com/pgi29t/eto1ec/oemx32hvddwpotd5
+BOS&寻维&标签平台-标签集合增加展示排序：https://hellobike.yuque.com/pgi29t/eto1ec/qnospkkkgavzo5no
+「头盔故障」、「头盔锁故障」标签打消标逻辑调整：https://hellobike.yuque.com/pgi29t/eto1ec/xpomgsdxki9eyvg9
+人工标签禁用后自动消标：https://hellobike.yuque.com/pgi29t/eto1ec/adz8tqwgg0vrz4dq
+新增单车车辆标签「枫叶」：https://hellobike.yuque.com/pgi29t/eto1ec/zlk8uy3oe8dygclv
+【低电需回仓】标签消标逻辑调整：https://hellobike.yuque.com/pgi29t/eto1ec/dzc45irexqf6uact
+
+
+数据分析平台需求汇总
+主体实现部分列更新：https://hellobike.yuque.com/pgi29t/eto1ec/xtadhntl0qtpqt7x
+SR定时输出到kafka优化：https://hellobike.yuque.com/pgi29t/eto1ec/ow8mg5qumbl73tto
+SR定时输出到hive优化：https://hellobike.yuque.com/pgi29t/eto1ec/dggugdlq4714h3vy
+SR主体写入乱序问题修复：https://hellobike.yuque.com/pgi29t/eto1ec/iwgmhea44nsisnri
+SR表结构校验：https://hellobike.yuque.com/pgi29t/eto1ec/yt3l96bye3liwg4k
+主体/事件Flink任务分离：https://hellobike.yuque.com/pgi29t/eto1ec/zy0zqbrust8fkly9
+[数据源配置]过滤问题修复：https://hellobike.yuque.com/pgi29t/eto1ec/ecar6hs1g72kcu3o
+Flink(SR)任务隔离-业务分级保障：https://hellobike.yuque.com/pgi29t/eto1ec/tfs2xzdgig99g4x4
+数据源字段映射数据库列关系优化：https://hellobike.yuque.com/pgi29t/eto1ec/nnczygvv3src1qdx
+血缘详细设计：https://hellobike.yuque.com/pgi29t/eto1ec/fs2giiprcinlea9p
+数据画像审批流数据存储优化：https://hellobike.yuque.com/pgi29t/eto1ec/nkmm5g19iy77tdwf
+BOS人员轨迹RocketMQ切换至Kafka：https://hellobike.yuque.com/pgi29t/eto1ec/szsuglyar3nbi6bg
+分时聚合底层功能优化：https://hellobike.yuque.com/pgi29t/eto1ec/iyh8u0bsghzy51cv
+电力小秘书换电数据源切换：https://hellobike.yuque.com/pgi29t/eto1ec/rtuxc3b3uggbq5pu
+
+
+灵境平台需求汇总：
+数据大盘指标整合（支持动态指标）：https://hellobike.yuque.com/pgi29t/eto1ec/tp8gomh2s9z243p5
+指标梳理：https://hellobike.yuque.com/pgi29t/eto1ec/hx1500rpo15q1rif
+网关服务OracleLogGW：https://hellobike.yuque.com/pgi29t/eto1ec/pyogrfpq4m0bytat
+

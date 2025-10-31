@@ -1,0 +1,62 @@
+
+
+AppTwAssetLabelIPES
+
+QdFAN5COinojf2sfxAm7
+
+AppWheel2AssetLabelDataService
+
+com.hellobike.vehicle.assetlabel.iface.AssetLabelIface
+assetLabelInfos
+
+{"arg0":"{\"assetNos\":[\"7110123976\"],\"includeFields\":[\"labelTag\",\"labelTime\"]}"}
+
+
+apollo(key:value)
+
+https://fat-admin.hellobike.cn/#/tag/tagManage/dataSourceManagement
+1. 设置跟pro环境（产品配置）一样的标签配置
+2. 标签平台-数据源接入管理-新增数据源（topic，metric默认）
+3. 
+
+
+
+设计 
+1. 根据租户和城市id拼接为百灵中配置的key的方式，比如：tenantId_cityGuid
+2. 引擎根据key获取value
+
+
+低电须回仓 -> 4079 	
+
+老规则：运维操作维修录单；
+新规则：监听车锁上报的电压，高于3.6V即可消标；
+
+
+
+
+122
+metric-bike-state apollo
+
+
+锋哥，工单帮忙批下：
+https://ticket.hellobike.cn/#/istarted?workorder_id=101964933
+https://ticket.hellobike.cn/#/istarted?workorder_id=101964934
+
+一、需求：小品牌人工标签优化
+
+二、改动点：1. AppWheel2AssetLabelDataService: 1）模板校验时，根据assetType固定校验列数量；2）校验第一列时，增加是否为NUMBERIC类型判断，避免NPE。
+2. AppAssetLabelWebService: 标签名称根据租户进行判重。
+
+三、代码： 1）https://gitlab.hellobike.cn/Support/AppWheel2AssetLabelDataService/compare/master...feature%2FAGENTBD-972
+2）https://gitlab.hellobike.cn/Support/AppAssetLabelWebService/compare/master...feature%2FAGENTBD-971
+
+四、技术方案：https://hellobike.yuque.com/bbteam/rmkokt/mng5mad0mxkz9m54
+
+
+
+需求：新增区域标签【还车体验差】
+改动点：1. AppLabelEngineService新增 lark 关键字；2. 新增【还车体验差】标签规则和标签参数。
+代码：https://gitlab.hellobike.cn/Support/AppLabelEngineService/compare/feature%2Fv3.0...feature%2Fv3.0_lark_confing
+标签规则：https://hellobike.yuque.com/bbteam/rmkokt/rvws5rfaf5s191t1#rk1ms
+技术方案：https://hellobike.yuque.com/bbteam/rmkokt/mng5mad0mxkz9m54
+锋哥，工单帮忙批下：https://common.hellobike.cn/#/platform/workflow/workspace/review?processId=1141344778813636608
